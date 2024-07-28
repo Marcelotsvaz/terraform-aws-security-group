@@ -1,0 +1,16 @@
+{
+	"terminal.integrated.profiles.linux": {
+		"fish": {
+			"path": "/usr/bin/fish",
+			"env": {
+				"AWS_PROFILE": "sandbox",
+				"TF_DATA_DIR": "${workspaceFolder}/.staging/terraform/",
+				"TF_CLI_ARGS_init": "-backend-config='path=${workspaceFolder}/.staging/terraform/state.tfstate'",
+			},
+		},
+	},
+	
+	"cSpell.words": [
+		"alltrue",
+	],
+}
