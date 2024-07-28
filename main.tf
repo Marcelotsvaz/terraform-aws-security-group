@@ -2,7 +2,7 @@ resource aws_security_group main {
 	vpc_id = var.vpc_id
 	
 	tags = {
-		Name = "${var.tag_prefix} ${var.name} Security Group"
+		Name = "${var.name_prefix} ${var.name} Security Group"
 	}
 	
 	lifecycle {
@@ -34,7 +34,7 @@ locals {
 		]
 	] )
 	
-	rule_map = [
+	rule_list = [
 		for rule in local.expanded_rules:
 		merge(
 			rule,
@@ -47,19 +47,23 @@ locals {
 			},
 		)
 	]
+	
+	enabled_rule_map = {
+		for rule in local.rule_list:
+		lower(
+			replace(
+				"${rule.name}-from-${rule.source_name}-to-${var.name}",
+				" ",
+				"_",
+			),
+		) => rule
+		if rule.enabled
+	}
 }
 
 
 resource aws_vpc_security_group_ingress_rule main {
-	for_each = {
-		for rule in local.rule_map:
-		lower( replace(
-			"${rule.name}-from-${rule.source_name}-to-${var.name}",
-			" ",
-			"_",
-		) ) => rule
-		if rule.enabled
-	}
+	for_each = local.enabled_rule_map
 	
 	security_group_id = aws_security_group.main.id
 	
@@ -74,7 +78,7 @@ resource aws_vpc_security_group_ingress_rule main {
 	referenced_security_group_id = try( each.value.from_security_group.id, null )
 	
 	tags = {
-		Name = "${each.value.name} (${each.value.source_name} to ${var.name}) Security Group Rule"
+		Name = "${each.value.name} (${each.value.source_name} to ${var.name}) SG Rule"
 	}
 }
 
@@ -90,7 +94,7 @@ resource aws_vpc_security_group_egress_rule all_from_group_to_all_ipv4 {
 	cidr_ipv4 = "0.0.0.0/0"
 	
 	tags = {
-		Name = "All (${var.name} to 0.0.0.0/0) Security Group Rule"
+		Name = "All (${var.name} to 0.0.0.0/0) SG Rule"
 	}
 }
 
@@ -106,6 +110,6 @@ resource aws_vpc_security_group_egress_rule all_from_group_to_all_ipv6 {
 	cidr_ipv6 = "::/0"
 	
 	tags = {
-		Name = "All (${var.name} to ::/0) Security Group Rule"
+		Name = "All (${var.name} to ::/0) SG Rule"
 	}
 }

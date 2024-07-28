@@ -3,13 +3,13 @@ variable vpc_id {
 	type = string
 }
 
-variable name {
-	description = "Name of the security group. Also used for describing relations in rules."
+variable name_prefix {
+	description = "Prefix for security group name."
 	type = string
 }
 
-variable tag_prefix {
-	description = "Prefix for resource tags."
+variable name {
+	description = "Pretty name for the security group. Used in tags. Also used for describing relations in rules."
 	type = string
 }
 
